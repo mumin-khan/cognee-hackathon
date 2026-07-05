@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RCA — Code Knowledge Graph Root-Cause Analysis</title>
+    <!-- Google Fonts for premium developer aesthetics -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar">
+            <div class="brand-section">
+                <div class="brand-logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 17L12 22L22 17" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="brand-name">
+                    <h2>cognee<span>rca</span></h2>
+                    <span class="badge">v1.2.2</span>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="../website/index.html" class="nav-item" style="text-decoration: none;">
+                    <span class="icon">🏠</span>
+                    <span class="label">Launch Page</span>
+                </a>
+                <button class="nav-item active" id="btn-tab-playground" onclick="switchTab('playground')">
+                    <span class="icon">💻</span>
+                    <span class="label">RCA Playground</span>
+                </button>
+                <button class="nav-item" id="btn-tab-releases" onclick="switchTab('releases')">
+                    <span class="icon">🏷️</span>
+                    <span class="label">Releases & Diffs</span>
+                </button>
+                <button class="nav-item" id="btn-tab-architecture" onclick="switchTab('architecture')">
+                    <span class="icon">🧠</span>
+                    <span class="label">Under the Hood</span>
+                </button>
+                <button class="nav-item" id="btn-tab-docs" onclick="switchTab('docs')">
+                    <span class="icon">📄</span>
+                    <span class="label">Quickstart Docs</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="project-info">
+                    <div class="label">CURRENT DATABASE</div>
+                    <div class="value">ladybug_local_store</div>
+                </div>
+                <div class="status-indicator">
+                    <span class="dot pulse-green"></span>
+                    <span class="status-text">Fully Local Mode</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="app-workspace">
+            <!-- Header Bar -->
+            <header class="workspace-header">
+                <div class="header-title">
+                    <h1 id="page-title">RCA Playground</h1>
+                    <p id="page-subtitle">Interactive Release Root-Cause Analysis Console</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="resetPlayground()">
+                        <span class="icon">🔄</span> Reset State
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetEverything()">
+                        <span class="icon">🗑️</span> Reset Everything
+                    </button>
+                    <a href="https://github.com/topoteretes/cognee" target="_blank" class="btn btn-primary">
+                        <span class="icon">⭐</span> Star Cognee
+                    </a>
+                </div>
+            </header>
+
+            <!-- Tabs Content -->
+            <div class="workspace-content">
+                
+                <!-- PLAYGROUND TAB -->
+                <section class="tab-panel active" id="panel-playground">
+                    <div class="grid-layout">
+                        <!-- Left Panel: Incident selector and options -->
+                        <div class="control-panel flex-column">
+                            <div class="card card-glow flex-column">
+                                <div class="card-header">
+                                    <h3>1. Select Incident</h3>
+                                    <span class="header-badge">Input</span>
+                                </div>
+                                <div class="card-body flex-column">
+                                    <!-- Ingest Repo CTA Card (Hidden when initialized) -->
+                                    <div id="ingest-repo-section" class="flex-column" style="gap: 12px; padding: 10px 0;">
+                                        <p class="section-desc">The Cognee codebase knowledge graph is currently empty. Click the button below to construct the graph by parsing AST structures and syncing releases in real-time.</p>
+                                        <button class="btn btn-accent btn-large" id="btn-ingest-repo" onclick="triggerIngestion()" style="width: 100%;">
+                                            📂 Ingest Demo Repo
+                                        </button>
+                                    </div>
+
+                                    <!-- Incident Selector (Visible after ingestion) -->
+                                    <div id="incident-selector-section" class="flex-column hidden">
+                                        <p class="section-desc">Select a simulated post-release incident to feed its stack trace into the RCA graph engine.</p>
+                                        
+                                        <div class="incident-selector" id="incident-selector-container">
+                                            <!-- Dynamically populated from API -->
+                                        </div>
+                                        
+                                        <div class="incident-desc-box" style="margin-top: 10px;">
+                                            <label>Scenario Description</label>
+                                            <div id="selected-inc-desc" class="desc-text">Select an incident to view details.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card flex-column">
+                                <div class="card-header">
+                                    <h3>2. Graph Search Parameters</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <div class="form-row">
+                                            <label for="param-hops">Blast Radius (k-hops):</label>
+                                            <span class="form-value" id="val-hops">2</span>
+                                        </div>
+                                        <input type="range" id="param-hops" min="1" max="4" value="2" oninput="document.getElementById('val-hops').innerText=this.value">
+                                        <span class="input-info">Depth of traversal in code graph calls/imports from traceback frames.</span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="param-window">Release Window Filter:</label>
+                                        <select id="param-window" class="form-control">
+                                            <option value="all">All releases (v1.1.0, v1.2.0)</option>
+                                            <option value="v1.1.0">v1.1.0 only (R1 replay)</option>
+                                            <option value="v1.2.0">v1.2.0 only</option>
+                                        </select>
+                                        <span class="input-info">Simulate chronological context by filtering which release diffs are visible.</span>
+                                    </div>
+
+                                    <button class="btn btn-accent btn-large" id="btn-run-rca" onclick="runAnalysis()" style="width: 100%; margin-top: 16px;">
+                                        <span class="btn-icon">⚡</span> Run Graph RCA
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Right Panel: Trace & Visualizer Canvas -->
+                        <div class="viewer-panel flex-column">
+                            <!-- Traceback Inspector -->
+                            <div class="card" style="flex-shrink: 0;">
+                                <div class="card-header">
+                                    <h3>Incident Stack Trace</h3>
+                                    <span class="header-action-text" id="inc-badge">N/A</span>
+                                </div>
+                                <div class="card-body">
+                                    <pre class="traceback-container"><code id="code-traceback">[No active traceback. Please ingest the demo repository to load incidents.]</code></pre>
+                                </div>
+                            </div>
+
+                            <!-- Middle Row: Console Logs & Ranked Candidates (Side-by-Side Grid) -->
+                            <div class="sub-grid-middle">
+                                <!-- Terminal Log Console -->
+                                <div class="card terminal-card flex-column" style="height: 100%;">
+                                    <div class="card-header">
+                                        <h3>Console Logs</h3>
+                                        <span class="terminal-badge">STDOUT</span>
+                                    </div>
+                                    <div class="card-body terminal-body" id="terminal-console">
+                                        <div class="terminal-line"><span class="text-blue">[system]</span> Ready. Select an incident and run diagnostics.</div>
+                                    </div>
+                                </div>
+
+                                <!-- Findings Table & Hunks -->
+                                <div class="card findings-card flex-column" style="height: 100%;">
+                                    <div class="card-header">
+                                        <h3>Ranked Root Cause Candidates</h3>
+                                        <span class="badge badge-info" id="findings-count">0 candidates</span>
+                                    </div>
+                                    <div class="card-body flex-column scrollable-y">
+                                        <div class="table-container">
+                                            <table class="findings-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th width="8%">Rank</th>
+                                                        <th width="35%">Symbol Name</th>
+                                                        <th width="15%">Release</th>
+                                                        <th width="12%">Hops</th>
+                                                        <th width="15%">Score</th>
+                                                        <th width="15%">Diff</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="findings-table-body">
+                                                    <tr>
+                                                        <td colspan="6" class="table-placeholder">No analysis run yet. Click "Run Graph RCA" above.</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <!-- Inline Diff Viewer -->
+                                        <div id="playground-diff-section" class="playground-diff-section hidden">
+                                            <div class="diff-header">
+                                                <span class="diff-title" id="playground-diff-title">app/payments.py @ v1.1.0</span>
+                                                <button class="btn-close" onclick="closePlaygroundDiff()">✕</button>
+                                            </div>
+                                            <pre class="diff-pre"><code id="playground-diff-code"></code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bottom Row: Live Code Graph Visualizer (Full Width) -->
+                            <div class="card card-visualizer flex-column">
+                                <div class="card-header">
+                                    <h3>Interactive Code Knowledge Graph</h3>
+                                    <div class="graph-legend">
+                                        <span class="legend-item"><span class="legend-dot dot-file"></span>File</span>
+                                        <span class="legend-item"><span class="legend-dot dot-func"></span>Func</span>
+                                        <span class="legend-item"><span class="legend-line line-call"></span>Call</span>
+                                        <span class="legend-item"><span class="legend-line line-import"></span>Import</span>
+                                        <span class="legend-item"><span class="legend-line line-modified"></span>Modified In</span>
+                                    </div>
+                                </div>
+                                <div class="card-body graph-container" id="graph-wrapper">
+                                    <canvas id="graph-canvas"></canvas>
+                                    <div class="canvas-instructions">
+                                        Drag nodes to adjust layout · Scroll to Zoom · Hover to view metadata
+                                    </div>
+                                    <!-- Node tooltip popup -->
+                                    <div id="node-tooltip" class="graph-tooltip"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- RELEASES TAB -->
+                <section class="tab-panel" id="panel-releases">
+                    <div class="grid-layout releases-layout">
+                        <!-- Left: Releases list -->
+                        <div class="card flex-column">
+                            <div class="card-header">
+                                <h3>Git Release History</h3>
+                            </div>
+                            <div class="card-body no-padding scrollable-y">
+                                <div class="releases-list" id="releases-list-container">
+                                    <div class="table-placeholder" style="padding: 20px; text-align: center;">No releases loaded. Ingest the demo repository first.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Selected Release Details -->
+                        <div class="viewer-panel flex-column">
+                            <div class="card flex-column" style="height: 100%;">
+                                <div class="card-header">
+                                    <h3 id="release-detail-title">Release Details</h3>
+                                    <span class="header-action-text" id="release-detail-sha">SHA: N/A</span>
+                                </div>
+                                <div class="card-body grid-layout-details scrollable-y">
+                                    <div class="release-meta-section">
+                                        <h4>Release Info</h4>
+                                        <div class="meta-grid">
+                                            <div class="meta-label">Author:</div>
+                                            <div class="meta-val">N/A</div>
+                                            
+                                            <div class="meta-label">Date:</div>
+                                            <div class="meta-val" id="release-detail-date">N/A</div>
+
+                                            <div class="meta-label">Message:</div>
+                                            <div class="meta-val italic" id="release-detail-msg">[No release selected. Ingest the demo repository first.]</div>
+                                        </div>
+
+                                        <h4 style="margin-top: 24px;">Tagged Symbols & Changes</h4>
+                                        <div class="changes-tree" id="release-changes-list">
+                                            <!-- List of symbols modified, added, deleted -->
+                                        </div>
+                                    </div>
+
+                                    <div class="release-diff-section flex-column">
+                                        <div class="diff-panel-header">
+                                            <span id="diff-file-title">File Diff: N/A</span>
+                                        </div>
+                                        <pre class="diff-pre"><code id="release-diff-code">[No diff active]</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ARCHITECTURE TAB -->
+                <section class="tab-panel" id="panel-architecture">
+                    <div class="arch-container scrollable-y">
+                        <div class="arch-hero">
+                            <h2>Under the Hood: Graph RCA Architecture</h2>
+                            <p>How Cognee constructs and queries codebase time-travel graphs to pinpoint post-release bugs.</p>
+                        </div>
+
+                        <div class="arch-grid">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>Phase 1: Code Baseline Extraction</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="arch-icon">📁 ──▶ 🌲 ──▶ 🕸️</div>
+                                    <p>The code is parsed using <strong>Tree-sitter</strong> into abstract syntax trees (ASTs). Rather than storing the raw syntax, RCA extracts high-level logical nodes using Cognee-native models:</p>
+                                    <ul>
+                                        <li><strong>CodeFile</strong>: Represents source files and scopes.</li>
+                                        <li><strong>FunctionDefinition</strong>: Represents individual functions, recording name and line ranges.</li>
+                                        <li><strong>ClassDefinition</strong>: Represents classes.</li>
+                                        <li><strong>ImportStatement</strong>: Tracks dependencies between files.</li>
+                                    </ul>
+                                    <p><strong>Call Edge Resolution:</strong> Identifies calls from one function to another within the same file or resolved via static import references. Nodes are assigned stable UUIDs derived from their qualified path (e.g. <code>uuid5("type:file:symbol")</code>), making ingestions idempotent.</p>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>Phase 2: Git Diff Syncing</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="arch-icon">🐙 ──▶ 📏 ──▶ 🏷️</div>
+                                    <p>When a release commits, we run <code>git diff prev..rel</code>. The line ranges of changes are mapped back to enclosing AST elements at both versions:</p>
+                                    <ul>
+                                        <li><strong>Modified/Added Symbols:</strong> Linked directly to the function node with a <code>MODIFIED_IN</code> edge pointing to a <code>Release</code> node.</li>
+                                        <li><strong>Deleted Symbols:</strong> Deletions break callers. Because the symbol node no longer exists in the new code baseline, a <code>ChangedSymbol</code> is mapped to the containing <strong>CodeFile</strong>.</li>
+                                        <li><strong>Miss Fallbacks:</strong> If a git diff line cannot be mapped to a specific function, it falls back to the parent file so that changes are never silently ignored.</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>Phase 3: Traversal & Scoring</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="arch-icon">🔍 ──▶ 🌐 ──▶ 📊</div>
+                                    <p>When a stack trace is submitted, the analysis proceeds entirely locally and deterministically without LLM lag:</p>
+                                    <ol>
+                                        <li><strong>Trace Parsing:</strong> Extracts files and symbols from the frames (starting from the deepest frame).</li>
+                                        <li><strong>Seed Nodes Lookup:</strong> Matches frames against baseline nodes in the Cognee database.</li>
+                                        <li><strong>k-Hop Traversal:</strong> Performs a multi-directional BFS traversal over <code>calls</code>, <code>imports</code>, and <code>containment</code> edges.</li>
+                                        <li><strong>Ranking:</strong> Candidates in the release window are scored based on proximity:
+                                            <ul>
+                                                <li><strong>0-hop dominates:</strong> Changed functions directly in the stack trace score highest.</li>
+                                                <li><strong>Distance:</strong> Scores decrease exponentially with hop distance.</li>
+                                                <li><strong>Recency:</strong> Newer releases out-rank older releases.</li>
+                                                <li><strong>Change Type:</strong> Modified/Deleted symbols out-rank Added symbols.</li>
+                                            </ul>
+                                        </li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin-top: 24px;">
+                            <div class="card-header">
+                                <h3>LLM-Local vs. LLM-Keyed Mode Comparison</h3>
+                            </div>
+                            <div class="card-body">
+                                <table class="comparison-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Feature</th>
+                                            <th>Fully Local (Default)</th>
+                                            <th>Keyed Mode (with LLM API Key)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Baseline Extraction</strong></td>
+                                            <td>✅ Fast, local Tree-Sitter AST parsing</td>
+                                            <td>✅ Same (deterministic)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Release Tagging</strong></td>
+                                            <td>✅ Local Git diff mapping</td>
+                                            <td>✅ Same (deterministic)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Incident Query (Trace)</strong></td>
+                                            <td>✅ Deterministic call-graph BFS traversal</td>
+                                            <td>✅ Same (deterministic)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Description-only Search</strong></td>
+                                            <td>❌ Disabled (returns empty findings)</td>
+                                            <td>✅ Vector search over code semantic chunks</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>RCA Narrative Completion</strong></td>
+                                            <td>❌ Disabled</td>
+                                            <td>✅ Generates automated root-cause reports</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- DOCS TAB -->
+                <section class="tab-panel" id="panel-docs">
+                    <div class="docs-container scrollable-y">
+                        <h2>Quickstart Documentation</h2>
+                        <p>Set up Cognee Release Root-Cause Analysis (RCA) on your own codebase in minutes.</p>
+
+                        <h3>1. Installation</h3>
+                        <p>Install the required packages. We recommend using <code>uv</code> or <code>pip</code> in a virtual environment.</p>
+                        <pre class="code-block"><code># Install core Cognee along with tree-sitter grammars and supporting packages
+pip install "cognee[codegraph]==1.2.2" tree-sitter-javascript tree-sitter-typescript networkx pytest</code></pre>
+
+                        <h3>2. Initialization</h3>
+                        <p>Configure Cognee to run locally. This configures a local Sqlite database and filesystem store.</p>
+                        <pre class="code-block"><code class="language-python">import asyncio
+from rca import env
+from rca.baseline import build_baseline
+from rca.diff_sync import sync_release
+from rca.query import analyze
+
+async def main():
+    # 1. Initialize local graph storage
+    await env.init()
+
+    # 2. Build the baseline code graph (reads files and constructs AST relationships)
+    await build_baseline("/path/to/my/project")
+
+    # 3. Synchronize a release diff (tags git changes onto the code graph)
+    await sync_release(
+        repo_path="/path/to/my/project",
+        prev_sha="a1b2c3d4",
+        rel_sha="e5f6a7b8",
+        tag="v1.1.0",
+        timestamp="2026-07-01T12:00:00Z"
+    )
+
+    # 4. Analyze an incident traceback
+    findings = await analyze(
+        stack_trace="""Traceback (most recent call last):
+  File "app/api.py", line 9, in handle_checkout
+    return process_payment(order)
+ValueError: invalid amount""",
+        k_hops=2,
+        release_window=["v1.1.0"] # filter by release window
+    )
+
+    for f in findings:
+        print(f"culprit: {f.qualified_name} (score: {f.score})")
+        print(f"diff hunk:\n{f.diff_hunk}")
+
+if __name__ == "__main__":
+    asyncio.run(main())</code></pre>
+
+                        <h3>3. Testing</h3>
+                        <p>The RCA suite includes 27 hermetic tests verifying diff mapping, re-sync idompotence, chronological replay, and ranking precision. Run them locally:</p>
+                        <pre class="code-block"><code>python -m pytest tests/ -v</code></pre>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Script assets -->
+    <script src="app.js"></script>
+</body>
+</html>

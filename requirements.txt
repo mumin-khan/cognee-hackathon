@@ -1,0 +1,24 @@
+# RCA — pinned to the versions this project is verified against (July 2026).
+# Fully-local: no API key required for baseline build, release tagging, or
+# stack-trace analysis. See README "Fully-local mode".
+
+# Core engine (codegraph extra brings tree-sitter + the Python grammar).
+cognee[codegraph]==1.2.2
+
+# tree-sitter core is pinned: the 0.24 core caps at grammar ABI 14. Do NOT bump
+# without also downgrading tree-sitter-javascript, whose 0.25 grammar is ABI 15
+# and fails to load against this core (JS is parsed via the TS grammar instead —
+# see rca/DECISIONS.md).
+tree-sitter==0.24.0
+tree-sitter-python==0.23.6
+tree-sitter-javascript==0.25.0
+tree-sitter-typescript==0.23.2
+
+# Graph traversal for blast-radius ranking.
+networkx>=3.6,<4
+
+# Dashboard (dashboard/server.py) is stdlib-only — no extra deps needed.
+
+# Tests.
+pytest>=8,<10
+pytest-asyncio>=1.4,<2

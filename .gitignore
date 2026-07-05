@@ -1,0 +1,12 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Cognee runtime state (rebuilt on init/demo run)
+.cognee_system/
+.cognee_data/
+
+# OS
+.DS_Store
