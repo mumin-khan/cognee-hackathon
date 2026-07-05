@@ -1,0 +1,49 @@
+WEBVTT
+
+00:00.000 --> 00:04.500
+Welcome to the Cognee Release Root-Cause Analysis (RCA) dashboard playground.
+
+00:04.500 --> 00:08.500
+Viewing the Quickstart Documentation tab for setting up Cognee on your own project.
+
+00:08.500 --> 00:11.000
+Returning to the Playground Console where the Code Knowledge Graph is currently empty.
+
+00:11.000 --> 00:16.500
+Clicking Ingest Demo Repo. Tree-Sitter AST parsing and Git release sync construct the graph.
+
+00:16.500 --> 00:25.500
+Graph construction completes with 39 edges. INC-1001 (Python Checkout failures) is selected.
+
+00:25.500 --> 00:29.000
+Clicking Run Graph RCA to start traversing the call-graph calls and imports.
+
+00:29.000 --> 00:32.500
+Traversing complete. Surfacing app.payments.process_payment as the root-cause candidate.
+
+00:32.500 --> 00:43.500
+Clicking View Diff. Git diff pane slides open showing code modifications in payments.py.
+
+00:43.500 --> 00:46.500
+Selecting INC-1002 (Python receipt display shows N/A) in the incident list.
+
+00:46.500 --> 00:50.000
+Clicking Run Graph RCA to traverse the call-graph from the receipt traceback frames.
+
+00:50.000 --> 00:53.000
+Traversing completes, identifying app.utils.format_currency as the root-cause candidate.
+
+00:53.000 --> 00:59.000
+Clicking View Diff to inspect the exact format code modifications inside app/utils.py.
+
+00:59.000 --> 01:02.000
+Selecting INC-1004 (Chronological R1 validation error) in the incident list.
+
+01:02.000 --> 01:05.500
+Clicking Run Graph RCA to trace the card validation error back through the graph.
+
+01:05.500 --> 01:08.500
+Traversing completes, surfacing app.payments.validate_card as the root-cause culprit.
+
+01:08.500 --> 01:13.000
+Clicking View Diff to review card validation modifications in app/payments.py.

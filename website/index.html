@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognee RCA — Code Knowledge Graph Root-Cause Analysis</title>
+    <!-- Google Fonts for developer-centric typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Specific Landing Page Styles overrides to keep clean */
+        body.landing-page {
+            overflow-y: auto !important;
+            height: auto;
+            background-color: #07090b;
+        }
+        
+        .landing-navbar {
+            height: 70px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: rgba(7, 9, 11, 0.8);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+        }
+
+        .landing-hero {
+            padding: 100px 20px 80px 20px;
+            text-align: center;
+            position: relative;
+            background: radial-gradient(circle at 50% 30%, rgba(56, 189, 248, 0.08) 0%, rgba(7, 9, 11, 0) 60%);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .hero-badge {
+            background-color: var(--color-cyan-glow);
+            color: var(--color-cyan);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 24px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .landing-hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -1.5px;
+            margin-bottom: 24px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            background: linear-gradient(135deg, #ffffff 40%, #8b949e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .landing-hero p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 650px;
+            margin: 0 auto 40px auto;
+            line-height: 1.6;
+        }
+
+        .hero-ctas {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 60px;
+        }
+
+        /* Mockup Window in Hero */
+        .hero-mockup {
+            max-width: 900px;
+            margin: 0 auto;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background-color: var(--bg-card);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 40px rgba(56, 189, 248, 0.05);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            aspect-ratio: 16 / 9;
+        }
+
+        .mockup-header {
+            height: 40px;
+            background-color: rgba(255,255,255,0.02);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 6px;
+        }
+
+        .mockup-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #30363d;
+        }
+
+        .mockup-dot.red { background-color: #ff5f56; }
+        .mockup-dot.yellow { background-color: #ffbd2e; }
+        .mockup-dot.green { background-color: #27c93f; }
+
+        .mockup-address {
+            margin-left: 20px;
+            background-color: rgba(0,0,0,0.25);
+            border-radius: 4px;
+            padding: 3px 20px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            flex-grow: 1;
+            max-width: 400px;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        .mockup-body {
+            flex-grow: 1;
+            display: flex;
+            background-color: #0b0d0f;
+            position: relative;
+        }
+
+        .mockup-sidebar {
+            width: 180px;
+            border-right: 1px solid var(--border-color);
+            background-color: #07090b;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .mockup-nav-item {
+            height: 8px;
+            background-color: #21262d;
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        .mockup-nav-item.short {
+            width: 60%;
+        }
+
+        .mockup-nav-item.active {
+            background-color: var(--color-cyan-glow);
+            border-left: 2px solid var(--color-cyan);
+        }
+
+        .mockup-content {
+            flex-grow: 1;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .mockup-grid {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 20px;
+            height: 100%;
+        }
+
+        .mockup-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .mockup-canvas-placeholder {
+            flex-grow: 1;
+            background-color: #07090b;
+            border-radius: 6px;
+            border: 1px dashed var(--border-color);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Simulated graph nodes inside mockup */
+        .mockup-node {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid var(--color-purple);
+            background-color: #1f242c;
+        }
+        .mockup-node.file {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border-color: var(--color-cyan);
+            background-color: #0d1117;
+        }
+        .mockup-node.glow {
+            box-shadow: 0 0 10px var(--color-cyan);
+            background-color: var(--color-cyan);
+            border-color: #ffffff;
+        }
+        .mockup-node.cause {
+            border-color: var(--color-green);
+            background-color: #1b4721;
+            box-shadow: 0 0 12px var(--color-green);
+        }
+
+        /* Power Section */
+        .powered-section {
+            padding: 80px 40px;
+            max-width: 1100px;
+            margin: 0 auto;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .power-card {
+            background: linear-gradient(135deg, rgba(18, 22, 27, 0.9) 0%, rgba(7, 9, 11, 0.9) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .power-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(171, 125, 246, 0.08) 0%, rgba(7, 9, 11, 0) 70%);
+            pointer-events: none;
+        }
+
+        .power-badge-glowing {
+            color: var(--color-purple);
+            border: 1px solid rgba(171, 125, 246, 0.3);
+            background-color: rgba(171, 125, 246, 0.08);
+            text-shadow: 0 0 4px rgba(171, 125, 246, 0.3);
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .power-card h2 {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.8px;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #ffffff 40%, var(--color-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .power-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .power-text p {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .cognee-features-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .cognee-feat-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .cognee-feat-item span.bullet {
+            color: var(--color-purple);
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        .cognee-feat-item h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .cognee-feat-item p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 0;
+            line-height: 1.4;
+        }
+
+        .power-visual {
+            background-color: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-secondary);
+            border-left: 3px solid var(--color-purple);
+        }
+
+        .power-visual pre {
+            white-space: pre-wrap;
+            color: #ab7df6;
+        }
+
+        .power-visual span.comment {
+            color: var(--text-muted);
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 80px 40px;
+            max-width: 1100px;
+            margin: 0 auto;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-header h2 {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.8px;
+            margin-bottom: 12px;
+        }
+
+        .section-header p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .feature-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: var(--border-highlight);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .feat-icon {
+            font-size: 28px;
+            margin-bottom: 16px;
+        }
+
+        .feature-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .feature-card p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* CLI Terminal Section */
+        .terminal-section {
+            padding: 80px 40px;
+            max-width: 1100px;
+            margin: 0 auto;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .terminal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .terminal-wrapper {
+            background-color: #07090b;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        .terminal-header {
+            height: 36px;
+            background-color: rgba(255,255,255,0.02);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 6px;
+        }
+
+        .terminal-body-content {
+            padding: 16px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-secondary);
+            min-height: 200px;
+        }
+
+        /* Footer Section */
+        .landing-footer {
+            padding: 60px 40px;
+            background-color: var(--bg-sidebar);
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .footer-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body class="landing-page dark-theme">
+
+    <!-- Top Navbar -->
+    <header class="landing-navbar">
+        <div class="brand-section" style="border: none; padding: 0;">
+            <div class="brand-logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 17L12 22L22 17" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 12L12 17L22 12" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div class="brand-name">
+                <h2 style="font-size: 16px;">cognee<span>rca</span></h2>
+            </div>
+        </div>
+        
+        <div class="header-actions">
+            <a href="https://github.com/mumin-khan/cognee-hackathon" target="_blank" class="btn btn-secondary">
+                GitHub Repo
+            </a>
+            <a href="https://github.com/mumin-khan/cognee-hackathon" target="_blank" class="btn btn-accent">
+                View on GitHub ⚡
+            </a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="landing-hero">
+        <span class="hero-badge">Release Incident Diagnostic Engine</span>
+        <h1>Pinpoint Post-Release Bugs Using Code Knowledge Graphs</h1>
+        <p>
+            When on-call raises a bug ticket, RCA walks the logical blast radius of stack traces to rank recently changed code commits by proximity. Stop guessing; locate the culprit instantly.
+        </p>
+        
+        <div class="hero-ctas">
+            <a href="https://github.com/mumin-khan/cognee-hackathon" target="_blank" class="btn btn-accent btn-large">
+                ⭐ Star on GitHub
+            </a>
+            <a href="#power" class="btn btn-secondary btn-large">
+                Why Powered by Cognee?
+            </a>
+        </div>
+
+        <!-- Simulated Mockup -->
+        <div class="hero-mockup">
+            <div class="mockup-header">
+                <div class="mockup-dot red"></div>
+                <div class="mockup-dot yellow"></div>
+                <div class="mockup-dot green"></div>
+                <div class="mockup-address">github.com/mumin-khan/cognee-hackathon</div>
+            </div>
+            <div class="video-placeholder" onclick="openVideoModal()" style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #0b0d0f; cursor: pointer; position: relative; border-radius: 0 0 8px 8px; border: none; flex-grow: 1;">
+                <div class="play-btn-circle" style="width: 80px; height: 80px; border-radius: 50%; background: rgba(56, 189, 248, 0.1); border: 2px solid #38bdf8; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);">
+                    <span style="font-size: 32px; color: #38bdf8; margin-left: 6px;">▶</span>
+                </div>
+                <div style="margin-top: 16px; font-family: monospace; font-size: 14px; color: #c9d1d9; font-weight: bold; letter-spacing: 1px;">WATCH COGNEE RCA WALKTHROUGH</div>
+                <div style="margin-top: 6px; font-family: monospace; font-size: 11px; color: #8b949e;">Click to play demo (1:13 · Captioned)</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Powered by Cognee Section -->
+    <section class="powered-section" id="power">
+        <div class="power-card">
+            <div class="power-badge-glowing">Technology Stack</div>
+            <div class="power-grid">
+                <div class="power-text">
+                    <h2>Powered by Cognee Cognitive Memory</h2>
+                    <p>
+                        RCA is built from the ground up on top of <strong>Cognee</strong>, the open-source AI memory engine. Rather than querying raw file strings or relying on expensive, non-deterministic LLM vector chunks, RCA structures your codebase as a persistent knowledge graph in Cognee.
+                    </p>
+                    
+                    <div class="cognee-features-list">
+                        <div class="cognee-feat-item">
+                            <span class="bullet">🧠</span>
+                            <div>
+                                <h4>Local Graph Storage</h4>
+                                <p>Ingests codebase structures into Cognee's native embedded memory adapters without requiring cloud API keys.</p>
+                            </div>
+                        </div>
+                        <div class="cognee-feat-item">
+                            <span class="bullet">🔗</span>
+                            <div>
+                                <h4>Semantic Object Alignment</h4>
+                                <p>Uses deterministic UUID mapping, allowing git diff line ranges and tree-sitter logical scopes to link to the exact same nodes.</p>
+                            </div>
+                        </div>
+                        <div class="cognee-feat-item">
+                            <span class="bullet">⚡</span>
+                            <div>
+                                <h4>Graph Completion Ingests</h4>
+                                <p>Reconciles previous releases, keeping historic MODIFIED_IN edges intact across repeated code baseline synchronizations.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="power-visual">
+                    <span class="comment"># Ingestion powered by cognee[codegraph]</span>
+                    <pre><code>from rca import env
+from rca.baseline import build_baseline
+from rca.diff_sync import sync_release
+from rca.query import analyze
+
+await env.init()  # embedded Cognee graph, fully local
+
+# tree-sitter -> CodeGraphEntities in the Cognee graph
+await build_baseline("/path/to/repo")
+await sync_release(repo, prev_sha, rel_sha, "v1.1.0", ts)
+
+# Deterministic ids: uuid5("type:file_path:symbol")
+# -> graph add_nodes MERGEs, so re-ingest upserts
+findings = await analyze(stack_trace, k_hops=2)</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Features Grid -->
+    <section class="features-section">
+        <div class="section-header">
+            <h2>Engine Specifications</h2>
+            <p>RCA represents a paradigm shift from pure string grep or embeddings-only retrieval by introducing historical context directly to code structure.</p>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feat-icon">🌲</div>
+                <h3>AST Symbol Extraction</h3>
+                <p>Parses files into logical components (files, functions, classes, and call/import edges) using tree-sitter grammars. Assigns deterministic IDs to prevent duplicates.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feat-icon">🏷️</div>
+                <h3>Git Release Tagging</h3>
+                <p>Maps <code>git diff prev..rel</code> line ranges directly to enclosing logical symbols, tagging them with <code>MODIFIED_IN</code> edges to release records.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feat-icon">🎯</div>
+                <h3>BFS Proximity Search</h3>
+                <p>Starts at stack traceback "seed nodes" and walks the call graph blast radius up to k-hops, ranking candidates by proximity and release recency.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Terminal Demo -->
+    <section class="terminal-section">
+        <div class="terminal-grid">
+            <div>
+                <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 16px;">Run RCA in Your Terminal</h2>
+                <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px;">
+                    Integrate RCA directly into your CI/CD pipeline or run it locally in your developer environment. Sync releases on git tags and parse incidents as they land.
+                </p>
+                <div class="code-block" style="margin-bottom: 0;">
+                    <code>pip install -r requirements.txt
+python demo.py   # narrated CLI walkthrough
+python -m uvicorn dashboard.api.main:app --port 8000   # web dashboard</code>
+                </div>
+            </div>
+            
+            <div class="terminal-wrapper">
+                <div class="terminal-header">
+                    <div class="mockup-dot red"></div>
+                    <div class="mockup-dot yellow"></div>
+                    <div class="mockup-dot green"></div>
+                </div>
+                <div class="terminal-body-content" id="landing-terminal">
+                    <div>$ python demo.py</div>
+                    <div class="text-muted">Act 0 · Build a synthetic service and its git history... Done.</div>
+                    <div class="text-muted">Act 1 · Ingest the codebase into a knowledge graph...</div>
+                    <div class="text-blue">Baseline graph: 7 files · 11 functions · 0 classes · 39 edges</div>
+                    <div class="text-blue">Tagged v1.1.0 diff onto the graph ✓</div>
+                    <div class="text-blue">Tagged v1.2.0 diff onto the graph ✓</div>
+                    <div class="text-muted">Act 2 · An incident lands — who caused it?</div>
+                    <div class="text-green">2. app.utils.format_currency [modified@v1.1.0] hops=1 score=999032 &lt;== TRUE ROOT CAUSE</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="landing-footer">
+        <div class="footer-container">
+            <div class="footer-logo">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#8b949e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 17L12 22L22 17" stroke="#8b949e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>cognee-rca</span>
+            </div>
+            <div>
+                Open Source (Apache 2.0) · Built on Cognee
+            </div>
+            <div class="footer-links">
+                <a href="https://github.com/mumin-khan/cognee-hackathon" target="_blank">GitHub Repo</a>
+                <a href="https://github.com/topoteretes/cognee" target="_blank">Cognee GitHub</a>
+                <a href="https://docs.cognee.ai" target="_blank">Docs</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Video Modal Lightbox -->
+    <div id="video-modal" class="video-modal-overlay">
+        <div class="video-modal-content">
+            <div class="video-modal-header">
+                <span>📺 Cognee RCA Walkthrough Demo</span>
+                <button class="modal-close-btn" onclick="closeVideoModal()">✕</button>
+            </div>
+            <div class="video-modal-body">
+                <video id="modal-video" controls muted playsinline>
+                    <source src="cognee-website.mp4?v=4" type="video/mp4">
+                    <track src="data:text/vtt;base64,V0VCVlRUCgowMDowMC4wMDAgLS0+IDAwOjA0LjUwMApXZWxjb21lIHRvIHRoZSBDb2duZWUgUmVsZWFzZSBSb290LUNhdXNlIEFuYWx5c2lzIChSQ0EpIGRhc2hib2FyZCBwbGF5Z3JvdW5kLgoKMDA6MDQuNTAwIC0tPiAwMDowOC41MDAKVmlld2luZyB0aGUgUXVpY2tzdGFydCBEb2N1bWVudGF0aW9uIHRhYiBmb3Igc2V0dGluZyB1cCBDb2duZWUgb24geW91ciBvd24gcHJvamVjdC4KCjAwOjA4LjUwMCAtLT4gMDA6MTEuMDAwClJldHVybmluZyB0byB0aGUgUGxheWdyb3VuZCBDb25zb2xlIHdoZXJlIHRoZSBDb2RlIEtub3dsZWRnZSBHcmFwaCBpcyBjdXJyZW50bHkgZW1wdHkuCgowMDoxMS4wMDAgLS0+IDAwOjE2LjUwMApDbGlja2luZyBJbmdlc3QgRGVtbyBSZXBvLiBUcmVlLVNpdHRlciBBU1QgcGFyc2luZyBhbmQgR2l0IHJlbGVhc2Ugc3luYyBjb25zdHJ1Y3QgdGhlIGdyYXBoLgoKMDA6MTYuNTAwIC0tPiAwMDoyNS41MDAKR3JhcGggY29uc3RydWN0aW9uIGNvbXBsZXRlcyB3aXRoIDM5IGVkZ2VzLiBJTkMtMTAwMSAoUHl0aG9uIENoZWNrb3V0IGZhaWx1cmVzKSBpcyBzZWxlY3RlZC4KCjAwOjI1LjUwMCAtLT4gMDA6MjkuMDAwCkNsaWNraW5nIFJ1biBHcmFwaCBSQ0EgdG8gc3RhcnQgdHJhdmVyc2luZyB0aGUgY2FsbC1ncmFwaCBjYWxscyBhbmQgaW1wb3J0cy4KCjAwOjI5LjAwMCAtLT4gMDA6MzIuNTAwClRyYXZlcnNpbmcgY29tcGxldGUuIFN1cmZhY2luZyBhcHAucGF5bWVudHMucHJvY2Vzc19wYXltZW50IGFzIHRoZSByb290LWNhdXNlIGNhbmRpZGF0ZS4KCjAwOjMyLjUwMCAtLT4gMDA6NDMuNTAwCkNsaWNraW5nIFZpZXcgRGlmZi4gR2l0IGRpZmYgcGFuZSBzbGlkZXMgb3BlbiBzaG93aW5nIGNvZGUgbW9kaWZpY2F0aW9ucyBpbiBwYXltZW50cy5weS4KCjAwOjQzLjUwMCAtLT4gMDA6NDYuNTAwClNlbGVjdGluZyBJTkMtMTAwMiAoUHl0aG9uIHJlY2VpcHQgZGlzcGxheSBzaG93cyBOL0EpIGluIHRoZSBpbmNpZGVudCBsaXN0LgoKMDA6NDYuNTAwIC0tPiAwMDo1MC4wMDAKQ2xpY2tpbmcgUnVuIEdyYXBoIFJDQSB0byB0cmF2ZXJzZSB0aGUgY2FsbC1ncmFwaCBmcm9tIHRoZSByZWNlaXB0IHRyYWNlYmFjayBmcmFtZXMuCgowMDo1MC4wMDAgLS0+IDAwOjUzLjAwMApUcmF2ZXJzaW5nIGNvbXBsZXRlcywgaWRlbnRpZnlpbmcgYXBwLnV0aWxzLmZvcm1hdF9jdXJyZW5jeSBhcyB0aGUgcm9vdC1jYXVzZSBjYW5kaWRhdGUuCgowMDo1My4wMDAgLS0+IDAwOjU5LjAwMApDbGlja2luZyBWaWV3IERpZmYgdG8gaW5zcGVjdCB0aGUgZXhhY3QgZm9ybWF0IGNvZGUgbW9kaWZpY2F0aW9ucyBpbnNpZGUgYXBwL3V0aWxzLnB5LgoKMDA6NTkuMDAwIC0tPiAwMTowMi4wMDAKU2VsZWN0aW5nIElOQy0xMDA0IChDaHJvbm9sb2dpY2FsIFIxIHZhbGlkYXRpb24gZXJyb3IpIGluIHRoZSBpbmNpZGVudCBsaXN0LgoKMDE6MDIuMDAwIC0tPiAwMTowNS41MDAKQ2xpY2tpbmcgUnVuIEdyYXBoIFJDQSB0byB0cmFjZSB0aGUgY2FyZCB2YWxpZGF0aW9uIGVycm9yIGJhY2sgdGhyb3VnaCB0aGUgZ3JhcGguCgowMTowNS41MDAgLS0+IDAxOjA4LjUwMApUcmF2ZXJzaW5nIGNvbXBsZXRlcywgc3VyZmFjaW5nIGFwcC5wYXltZW50cy52YWxpZGF0ZV9jYXJkIGFzIHRoZSByb290LWNhdXNlIGN1bHByaXQuCgowMTowOC41MDAgLS0+IDAxOjEzLjAwMApDbGlja2luZyBWaWV3IERpZmYgdG8gcmV2aWV3IGNhcmQgdmFsaWRhdGlvbiBtb2RpZmljYXRpb25zIGluIGFwcC9wYXltZW50cy5weS4K" kind="subtitles" srclang="en" label="English" default>
+                    Your browser doesn't support inline video playback.
+                    <a href="cognee-website.mp4?v=4" target="_blank" rel="noopener">Download the video</a> to watch it.
+                </video>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .video-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(11, 13, 15, 0.95);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+        .video-modal-content {
+            position: relative;
+            width: 90%;
+            max-width: 960px;
+            aspect-ratio: 16/9;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+        .video-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            font-family: monospace;
+            color: #c9d1d9;
+            font-weight: bold;
+        }
+        .modal-close-btn {
+            background: none;
+            border: none;
+            color: #8b949e;
+            font-size: 22px;
+            cursor: pointer;
+            outline: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+        .modal-close-btn:hover {
+            color: #f85149;
+        }
+        .video-modal-body {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            position: relative;
+        }
+        .video-modal-body video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            position: relative;
+            z-index: 1;
+        }
+        .video-placeholder:hover .play-btn-circle {
+            background: rgba(56, 189, 248, 0.2) !important;
+            transform: scale(1.08);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.4) !important;
+        }
+        
+        /* Captions styling for developer dashboard theme */
+        ::cue {
+            background-color: rgba(11, 13, 15, 0.85);
+            color: #38bdf8;
+            font-family: monospace;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 4px;
+            padding: 4px 8px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+        }
+        @media (max-width: 768px) {
+            ::cue {
+                font-size: 11px;
+                padding: 2px 4px;
+            }
+        }
+    </style>
+
+    <script>
+        const VIDEO_END = 73; // cap playback at 1:13
+
+        function openVideoModal() {
+            const modal = document.getElementById("video-modal");
+            const video = document.getElementById("modal-video");
+            modal.style.display = "flex";
+            video.currentTime = 0;
+
+            // Force subtitles on — set mode after tracks are ready
+            const enableTrack = () => {
+                if (video.textTracks && video.textTracks.length > 0) {
+                    video.textTracks[0].mode = 'showing';
+                }
+            };
+            if (video.readyState >= 1) {
+                enableTrack();
+            } else {
+                video.addEventListener('loadedmetadata', enableTrack, { once: true });
+            }
+
+            // Loop back at 73s
+            video.ontimeupdate = function() {
+                if (video.currentTime >= VIDEO_END) {
+                    video.currentTime = 0;
+                }
+            };
+
+            video.play();
+        }
+        function closeVideoModal() {
+            const modal = document.getElementById("video-modal");
+            const video = document.getElementById("modal-video");
+            video.pause();
+            video.ontimeupdate = null;
+            modal.style.display = "none";
+        }
+
+        // Close modal on click outside content
+        window.onclick = function(event) {
+            const modal = document.getElementById("video-modal");
+            if (event.target == modal) {
+                closeVideoModal();
+            }
+        }
+    </script>
+</body>
+</html>
