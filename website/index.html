@@ -652,7 +652,7 @@ findings = await analyze(stack_trace, k_hops=2)</code></pre>
                 <div class="code-block" style="margin-bottom: 0;">
                     <code>pip install -r requirements.txt
 python demo.py   # narrated CLI walkthrough
-python -m uvicorn dashboard.api.main:app --port 8000   # web dashboard</code>
+python dashboard/server.py   # web dashboard playground (port 8080)</code>
                 </div>
             </div>
             
@@ -706,10 +706,10 @@ python -m uvicorn dashboard.api.main:app --port 8000   # web dashboard</code>
             </div>
             <div class="video-modal-body">
                 <video id="modal-video" controls muted playsinline>
-                    <source src="cognee-website.mp4?v=4" type="video/mp4">
+                    <source src="cognee-video.mp4" type="video/mp4">
                     <track src="data:text/vtt;base64,V0VCVlRUCgowMDowMC4wMDAgLS0+IDAwOjA0LjUwMApXZWxjb21lIHRvIHRoZSBDb2duZWUgUmVsZWFzZSBSb290LUNhdXNlIEFuYWx5c2lzIChSQ0EpIGRhc2hib2FyZCBwbGF5Z3JvdW5kLgoKMDA6MDQuNTAwIC0tPiAwMDowOC41MDAKVmlld2luZyB0aGUgUXVpY2tzdGFydCBEb2N1bWVudGF0aW9uIHRhYiBmb3Igc2V0dGluZyB1cCBDb2duZWUgb24geW91ciBvd24gcHJvamVjdC4KCjAwOjA4LjUwMCAtLT4gMDA6MTEuMDAwClJldHVybmluZyB0byB0aGUgUGxheWdyb3VuZCBDb25zb2xlIHdoZXJlIHRoZSBDb2RlIEtub3dsZWRnZSBHcmFwaCBpcyBjdXJyZW50bHkgZW1wdHkuCgowMDoxMS4wMDAgLS0+IDAwOjE2LjUwMApDbGlja2luZyBJbmdlc3QgRGVtbyBSZXBvLiBUcmVlLVNpdHRlciBBU1QgcGFyc2luZyBhbmQgR2l0IHJlbGVhc2Ugc3luYyBjb25zdHJ1Y3QgdGhlIGdyYXBoLgoKMDA6MTYuNTAwIC0tPiAwMDoyNS41MDAKR3JhcGggY29uc3RydWN0aW9uIGNvbXBsZXRlcyB3aXRoIDM5IGVkZ2VzLiBJTkMtMTAwMSAoUHl0aG9uIENoZWNrb3V0IGZhaWx1cmVzKSBpcyBzZWxlY3RlZC4KCjAwOjI1LjUwMCAtLT4gMDA6MjkuMDAwCkNsaWNraW5nIFJ1biBHcmFwaCBSQ0EgdG8gc3RhcnQgdHJhdmVyc2luZyB0aGUgY2FsbC1ncmFwaCBjYWxscyBhbmQgaW1wb3J0cy4KCjAwOjI5LjAwMCAtLT4gMDA6MzIuNTAwClRyYXZlcnNpbmcgY29tcGxldGUuIFN1cmZhY2luZyBhcHAucGF5bWVudHMucHJvY2Vzc19wYXltZW50IGFzIHRoZSByb290LWNhdXNlIGNhbmRpZGF0ZS4KCjAwOjMyLjUwMCAtLT4gMDA6NDMuNTAwCkNsaWNraW5nIFZpZXcgRGlmZi4gR2l0IGRpZmYgcGFuZSBzbGlkZXMgb3BlbiBzaG93aW5nIGNvZGUgbW9kaWZpY2F0aW9ucyBpbiBwYXltZW50cy5weS4KCjAwOjQzLjUwMCAtLT4gMDA6NDYuNTAwClNlbGVjdGluZyBJTkMtMTAwMiAoUHl0aG9uIHJlY2VpcHQgZGlzcGxheSBzaG93cyBOL0EpIGluIHRoZSBpbmNpZGVudCBsaXN0LgoKMDA6NDYuNTAwIC0tPiAwMDo1MC4wMDAKQ2xpY2tpbmcgUnVuIEdyYXBoIFJDQSB0byB0cmF2ZXJzZSB0aGUgY2FsbC1ncmFwaCBmcm9tIHRoZSByZWNlaXB0IHRyYWNlYmFjayBmcmFtZXMuCgowMDo1MC4wMDAgLS0+IDAwOjUzLjAwMApUcmF2ZXJzaW5nIGNvbXBsZXRlcywgaWRlbnRpZnlpbmcgYXBwLnV0aWxzLmZvcm1hdF9jdXJyZW5jeSBhcyB0aGUgcm9vdC1jYXVzZSBjYW5kaWRhdGUuCgowMDo1My4wMDAgLS0+IDAwOjU5LjAwMApDbGlja2luZyBWaWV3IERpZmYgdG8gaW5zcGVjdCB0aGUgZXhhY3QgZm9ybWF0IGNvZGUgbW9kaWZpY2F0aW9ucyBpbnNpZGUgYXBwL3V0aWxzLnB5LgoKMDA6NTkuMDAwIC0tPiAwMTowMi4wMDAKU2VsZWN0aW5nIElOQy0xMDA0IChDaHJvbm9sb2dpY2FsIFIxIHZhbGlkYXRpb24gZXJyb3IpIGluIHRoZSBpbmNpZGVudCBsaXN0LgoKMDE6MDIuMDAwIC0tPiAwMTowNS41MDAKQ2xpY2tpbmcgUnVuIEdyYXBoIFJDQSB0byB0cmFjZSB0aGUgY2FyZCB2YWxpZGF0aW9uIGVycm9yIGJhY2sgdGhyb3VnaCB0aGUgZ3JhcGguCgowMTowNS41MDAgLS0+IDAxOjA4LjUwMApUcmF2ZXJzaW5nIGNvbXBsZXRlcywgc3VyZmFjaW5nIGFwcC5wYXltZW50cy52YWxpZGF0ZV9jYXJkIGFzIHRoZSByb290LWNhdXNlIGN1bHByaXQuCgowMTowOC41MDAgLS0+IDAxOjEzLjAwMApDbGlja2luZyBWaWV3IERpZmYgdG8gcmV2aWV3IGNhcmQgdmFsaWRhdGlvbiBtb2RpZmljYXRpb25zIGluIGFwcC9wYXltZW50cy5weS4K" kind="subtitles" srclang="en" label="English" default>
                     Your browser doesn't support inline video playback.
-                    <a href="cognee-website.mp4?v=4" target="_blank" rel="noopener">Download the video</a> to watch it.
+                    <a href="cognee-video.mp4" target="_blank" rel="noopener">Download the video</a> to watch it.
                 </video>
             </div>
         </div>
@@ -819,15 +819,17 @@ python -m uvicorn dashboard.api.main:app --port 8000   # web dashboard</code>
 
             // Force subtitles on — set mode after tracks are ready
             const enableTrack = () => {
-                if (video.textTracks && video.textTracks.length > 0) {
-                    video.textTracks[0].mode = 'showing';
+                if (video.textTracks) {
+                    for (let i = 0; i < video.textTracks.length; i++) {
+                        video.textTracks[i].mode = 'showing';
+                    }
                 }
             };
-            if (video.readyState >= 1) {
-                enableTrack();
-            } else {
-                video.addEventListener('loadedmetadata', enableTrack, { once: true });
-            }
+            enableTrack();
+            video.addEventListener('loadedmetadata', enableTrack);
+            video.addEventListener('loadeddata', enableTrack);
+            video.addEventListener('canplay', enableTrack);
+            video.addEventListener('play', enableTrack);
 
             // Loop back at 73s
             video.ontimeupdate = function() {
